@@ -1,0 +1,15 @@
+# Dependencias
+node_modules/
+
+# Reportes y artefactos de Lighthouse CI (regenerables)
+lhci-reports/
+.lighthouseci/
+
+# Variables de entorno locales
+.env
+.env.*
+
+# Sistema y editores
+.DS_Store
+*.log
+npm-debug.log*

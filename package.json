@@ -1,0 +1,12 @@
+{
+  "name": "lighthouse-parallel",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "lh:parallel": "node run-parallel.js"
+  },
+  "dependencies": {
+    "chrome-launcher": "^0.15.2",
+    "lighthouse": "^12.0.0"
+  }
+}
