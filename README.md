@@ -65,6 +65,9 @@ Eso ejecuta `node run-parallel.js`, que lanza varias auditorías en paralelo (co
 
 - `lhci-reports/desktop/report_<ruta>.html` y `.json`
 - `lhci-reports/mobile/report_<ruta>.html` y `.json`
+- **`accessibility-report.html`** en la raíz del proyecto (resumen agregado; se regenera al terminar cada corrida)
+
+Para volver a generar solo el HTML a partir de los JSON ya existentes: `npm run report:html`.
 
 Al final verás en consola un resumen; las URLs que no cumplan el mínimo de accesibilidad se listan con advertencia.
 

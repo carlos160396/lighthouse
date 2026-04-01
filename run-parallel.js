@@ -2,14 +2,16 @@ import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config = require('./module.cjs');
-const { url: urls, formFactors = ['desktop', 'mobile'] } = config.ci.collect;
+const { url: urlList, formFactors = ['desktop', 'mobile'] } = config.ci.collect;
+// Acepta lista plana o anidada por error (un [ extra hace que Node pase un array como argv → URL inválida)
+const urls = Array.isArray(urlList) ? urlList.flat(Infinity).filter((u) => typeof u === 'string') : [];
 const minAccessibility = config.ci.assert?.assertions?.['categories:accessibility']?.[1]?.minScore ?? 0.9;
 const outputDir = path.resolve(__dirname, config.ci.upload?.outputDir || './lhci-reports');
 // Máximo de workers a la vez (evita ENOTEMPTY y sobrecarga con muchas URLs)
@@ -44,6 +46,20 @@ function runAuditInProcess(url, formFactor) {
 function safeName(url) {
   const name = new URL(url).pathname.replace(/\//g, '_') || 'index';
   return name.slice(1) || 'index';
+}
+
+function regenerateAccessibilityReport() {
+  const reportPath = path.join(__dirname, 'accessibility-report.html');
+  const scriptPath = path.join(__dirname, 'generate-accessibility-report.mjs');
+  console.log('\nActualizando accessibility-report.html…');
+  const r = spawnSync(process.execPath, [scriptPath, '--out', reportPath], {
+    cwd: __dirname,
+    stdio: 'inherit',
+    env: { ...process.env },
+  });
+  if (r.status !== 0) {
+    console.warn('No se pudo generar accessibility-report.html (¿hay JSON en lhci-reports?).');
+  }
 }
 
 async function main() {
@@ -98,6 +114,8 @@ async function main() {
     }
     if (printedHeader) console.log('');
   }
+
+  regenerateAccessibilityReport();
 
   if (failedCount > 0) {
     process.exitCode = 1;

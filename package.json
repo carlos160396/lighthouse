@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "lh:parallel": "node run-parallel.js"
+    "lh:parallel": "node run-parallel.js",
+    "report:html": "node generate-accessibility-report.mjs"
   },
   "dependencies": {
     "chrome-launcher": "^0.15.2",

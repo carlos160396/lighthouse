@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lighthouse Accessibility Report — Bizee</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2e3345;
+    --text: #e4e6f0;
+    --text-dim: #8b8fa7;
+    --accent: #6c5ce7;
+    --accent-light: #a29bfe;
+    --danger: #ff6b6b;
+    --warning: #ffa400;
+    --success: #0cce6b;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-light), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+  }
+  .header .subtitle {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  .header .date { color: var(--text-dim); font-size: 0.8rem; margin-top: 0.25rem; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+  /* Issues summary */
+  .issues-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .issues-summary h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+  .issue-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  .issue-bar-label {
+    font-size: 0.82rem;
+    min-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+  }
+  .issue-bar-track {
+    flex: 1;
+    height: 22px;
+    background: var(--surface2);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .issue-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--danger));
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 30px;
+    transition: width 0.5s ease;
+  }
+  .issue-bar-pages { font-size: 0.78rem; color: var(--text-dim); min-width: 75px; text-align: right; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent-light); border-bottom-color: var(--accent-light); }
+  .tab-badge {
+    display: inline-block;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .tab-content { display: none; padding-top: 1.5rem; }
+  .tab-content.active { display: block; }
+
+  /* Table */
+  .results-table { width: 100%; border-collapse: collapse; }
+  .results-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .th-score { width: 80px; text-align: center; }
+  .th-issues, .th-elements { width: 90px; text-align: center; }
+  .th-expand { width: 48px; }
+
+  .page-row td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .page-row:hover { background: var(--surface); }
+  .cell-score { text-align: center; }
+  .cell-issues, .cell-elements {
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .page-link {
+    color: var(--accent-light);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+  .page-link:hover { text-decoration: underline; }
+  .audit-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .audit-tag {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .tag-count {
+    display: inline-block;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: 8px;
+    margin-left: 3px;
+  }
+  .btn-expand {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .btn-expand:hover { background: var(--border); color: var(--text); }
+  .btn-expand.open { transform: rotate(180deg); }
+
+  /* Detail row */
+  .detail-row td { padding: 0; border-bottom: 1px solid var(--border); }
+  .detail-content {
+    background: var(--surface);
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .audit-detail {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .audit-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .audit-header strong { font-size: 0.9rem; }
+  .element-count {
+    font-size: 0.72rem;
+    background: var(--danger);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .audit-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin: 0.5rem 0;
+    line-height: 1.5;
+  }
+  .items-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .item-entry {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+  .snippet {
+    display: block;
+    background: #1e2030;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #f8c291;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin-bottom: 4px;
+  }
+  .selector { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+  .selector code { color: var(--accent-light); background: none; font-size: 0.72rem; }
+  .explanation { font-size: 0.72rem; color: var(--warning); margin-top: 4px; }
+  .more-items { font-size: 0.75rem; color: var(--text-dim); font-style: italic; padding: 4px 0; }
+  .no-issues { text-align: center; color: var(--success); font-size: 1rem; padding: 2rem; }
+
+  .score-ring { vertical-align: middle; }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #222; }
+    .stat-card, .issues-summary, .audit-detail, .item-entry { border-color: #ddd; }
+    .btn-expand { display: none; }
+  }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Lighthouse Accessibility Report</h1>
+    <div class="subtitle">Páginas por debajo del 96% de accesibilidad</div>
+    <div class="date">1 de abril de 2026, 14:39</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--danger)">3</div>
+      <div class="stat-label">Páginas con issues</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--warning)">4</div>
+      <div class="stat-label">Fallan en Desktop</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--warning)">4</div>
+      <div class="stat-label">Fallan en Mobile</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:#ffa400">95%</div>
+      <div class="stat-label">Promedio Desktop</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:#ffa400">95%</div>
+      <div class="stat-label">Promedio Mobile</div>
+    </div>
+  </div>
+
+  <div class="issues-summary">
+    <h2>Resumen de Issues más comunes</h2>
+    
+        <div class="issue-bar-row">
+          <div class="issue-bar-label" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast</div>
+          <div class="issue-bar-track"><div class="issue-bar-fill" style="width:100%">44</div></div>
+          <div class="issue-bar-pages">6 páginas</div>
+        </div>
+        <div class="issue-bar-row">
+          <div class="issue-bar-label" title="Heading elements are not in a sequentially-descending order">heading-order</div>
+          <div class="issue-bar-track"><div class="issue-bar-fill" style="width:9%">4</div></div>
+          <div class="issue-bar-pages">4 páginas</div>
+        </div>
+        <div class="issue-bar-row">
+          <div class="issue-bar-label" title="Image elements have `[alt]` attributes that are redundant text.">image-redundant-alt</div>
+          <div class="issue-bar-track"><div class="issue-bar-fill" style="width:5%">2</div></div>
+          <div class="issue-bar-pages">2 páginas</div>
+        </div>
+        <div class="issue-bar-row">
+          <div class="issue-bar-label" title="Links do not have a discernible name">link-name</div>
+          <div class="issue-bar-track"><div class="issue-bar-fill" style="width:5%">2</div></div>
+          <div class="issue-bar-pages">2 páginas</div>
+        </div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab active" onclick="switchTab('desktop', this)">
+      🖥 Desktop <span class="tab-badge">4</span>
+    </button>
+    <button type="button" class="tab" onclick="switchTab('mobile', this)">
+      📱 Mobile <span class="tab-badge">4</span>
+    </button>
+  </div>
+
+  <div id="tab-desktop" class="tab-content active">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th class="th-score">Score</th>
+            <th class="th-path">Página</th>
+            <th class="th-issues">Auditorías</th>
+            <th class="th-elements">Elementos</th>
+            <th class="th-expand"></th>
+          </tr>
+        </thead>
+        <tbody>
+
+      <tr class="page-row" data-page="-articles-ideas">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ff6b6b" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="251.32741228718345"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ff6b6b">0</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/articles/ideas" target="_blank" class="page-link">/articles/ideas</a>
+          <div class="audit-tags"></div>
+        </td>
+        <td class="cell-issues">0</td>
+        <td class="cell-elements">0</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+          </div>
+        </td>
+      </tr>
+
+      <tr class="page-row" data-page="-get-bizee-podcast">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ffa400" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="15.079644737231021"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ffa400">94</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/get-bizee-podcast" target="_blank" class="page-link">/get-bizee-podcast</a>
+          <div class="audit-tags"><span class="audit-tag" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast <span class="tag-count">9</span></span><span class="audit-tag" title="Heading elements are not in a sequentially-descending order">heading-order <span class="tag-count">1</span></span><span class="audit-tag" title="Image elements have `[alt]` attributes that are redundant text.">image-redundant-alt <span class="tag-count">1</span></span></div>
+        </td>
+        <td class="cell-issues">3</td>
+        <td class="cell-elements">11</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Background and foreground colors do not have a sufficient contrast ratio.</strong>
+                  <span class="element-count">9 elements</span>
+                </div>
+                <p class="audit-desc">Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;show-more-0&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(0, 'show-more-0')&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.hidden &gt; div#show-more-0</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;show-more-1&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(1, 'show-more-1')&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.hidden &gt; div#show-more-1</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;show-more-2&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(2, 'show-more-2')&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.hidden &gt; div#show-more-2</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;show-more-3&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(3, 'show-more-3')&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.hidden &gt; div#show-more-3</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;show-more-4&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(4, 'show-more-4')&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.hidden &gt; div#show-more-4</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a target=&quot;_blank&quot; href=&quot;https://www.linkedin.com/in/entmagazineamy/&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span class=&quot;hidden md:block&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; button.btn-tracker-1 &gt; span.hidden</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;p&gt;</code>
+                      <div class="selector">Selector: <code>div.lg:flex-row-reverse &gt; div.flex &gt; div.flex &gt; p</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span class=&quot;hidden md:block&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; button.btn-tracker-2 &gt; span.hidden</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Heading elements are not in a sequentially-descending order</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. Learn more about heading order.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;h3 id=&quot;&quot; class=&quot;standarized-title-sizes font-sans !text-lg !font-bold !leading-none !text-…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.section &gt; div.flex &gt; a.flex &gt; h3.standarized-title-sizes</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Image elements have `[alt]` attributes that are redundant text.</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Informative elements should aim for short, descriptive alternative text. Alternative text that is exactly the same as the text adjacent to the link or image is potentially confusing for screen reader users, because the text will be read twice. Learn more about the `alt` attribute.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;img class=&quot;h-[25px] w-[25px] min-w-[25px] rounded-lg&quot; src=&quot;&quot; alt=&quot;Youtube&quot; width=&quot;26&quot; height=&quot;26&quot; loading=&quot;lazy&quot; decoding=&quot;async&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; a.flex &gt; picture &gt; img.h-[25px]</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="page-row" data-page="-help-center">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ffa400" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="12.566370614359183"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ffa400">95</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/help-center" target="_blank" class="page-link">/help-center</a>
+          <div class="audit-tags"><span class="audit-tag" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast <span class="tag-count">1</span></span><span class="audit-tag" title="Heading elements are not in a sequentially-descending order">heading-order <span class="tag-count">1</span></span></div>
+        </td>
+        <td class="cell-issues">2</td>
+        <td class="cell-elements">2</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Background and foreground colors do not have a sufficient contrast ratio.</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span x-text=&quot;breadcrumb&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; a.hover:underline &gt; span</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Heading elements are not in a sequentially-descending order</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. Learn more about heading order.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;h3 id=&quot;mlleetzx&quot; class=&quot;standarized-title-sizes font-sans bounded-subtitle-lg !z-0 !mb-2 !text-cen…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.section &gt; div.relative &gt; div.mx-auto &gt; h3#mlleetzx</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="page-row" data-page="-llc-formation-by-state-north-carolina-business-names">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ffa400" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="20.106192982974665"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ffa400">92</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/llc-formation-by-state/north-carolina/business-names" target="_blank" class="page-link">/llc-formation-by-state/north-carolina/business-names</a>
+          <div class="audit-tags"><span class="audit-tag" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast <span class="tag-count">11</span></span><span class="audit-tag" title="Links do not have a discernible name">link-name <span class="tag-count">1</span></span></div>
+        </td>
+        <td class="cell-issues">2</td>
+        <td class="cell-elements">12</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Background and foreground colors do not have a sufficient contrast ratio.</strong>
+                  <span class="element-count">11 elements</span>
+                </div>
+                <p class="audit-desc">Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span x-text=&quot;breadcrumb&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; a.hover:underline &gt; span</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; href=&quot;https://www.sosnc.gov/online_services/search/by_title/_Business_Registrati…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;/llc-formation-by-state/north-carolina&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; href=&quot;https://edpnc.com/wp-content/uploads/2024/03/A-Assumed-Business-Name-Certi…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/business-format…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/articles/legal/…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.default_styles &gt; p &gt; span &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/business-format…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; href=&quot;https://www.sosnc.gov/online_services/search/by_title/_Business_Registrati…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;#general-rules-for-llc-names&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;#north-carolina-dba-or-assumed-name&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;#register-your-business-name-with-the-north-carolina-secretary-of-state&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Links do not have a discernible name</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Link text (and alternate text for images, when used as links) that is discernible, unique, and focusable improves the navigation experience for screen reader users. Learn how to make links accessible.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/business-format…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.p-6 &gt; div.default_styles &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+        </tbody>
+      </table>
+  </div>
+
+  <div id="tab-mobile" class="tab-content">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th class="th-score">Score</th>
+            <th class="th-path">Página</th>
+            <th class="th-issues">Auditorías</th>
+            <th class="th-elements">Elementos</th>
+            <th class="th-expand"></th>
+          </tr>
+        </thead>
+        <tbody>
+
+      <tr class="page-row" data-page="-articles-ideas">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ff6b6b" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="251.32741228718345"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ff6b6b">0</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/articles/ideas" target="_blank" class="page-link">/articles/ideas</a>
+          <div class="audit-tags"></div>
+        </td>
+        <td class="cell-issues">0</td>
+        <td class="cell-elements">0</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+          </div>
+        </td>
+      </tr>
+
+      <tr class="page-row" data-page="-get-bizee-podcast">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ffa400" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="15.079644737231021"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ffa400">94</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/get-bizee-podcast" target="_blank" class="page-link">/get-bizee-podcast</a>
+          <div class="audit-tags"><span class="audit-tag" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast <span class="tag-count">9</span></span><span class="audit-tag" title="Heading elements are not in a sequentially-descending order">heading-order <span class="tag-count">1</span></span><span class="audit-tag" title="Image elements have `[alt]` attributes that are redundant text.">image-redundant-alt <span class="tag-count">1</span></span></div>
+        </td>
+        <td class="cell-issues">3</td>
+        <td class="cell-elements">11</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Background and foreground colors do not have a sufficient contrast ratio.</strong>
+                  <span class="element-count">9 elements</span>
+                </div>
+                <p class="audit-desc">Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;sm-show-more-0&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(0, 'sm-show-more-0', true)&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.flex-col &gt; div#sm-show-more-0</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;sm-show-more-1&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(1, 'sm-show-more-1', true)&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.flex-col &gt; div#sm-show-more-1</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;sm-show-more-2&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(2, 'sm-show-more-2', true)&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.flex-col &gt; div#sm-show-more-2</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;sm-show-more-3&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(3, 'sm-show-more-3', true)&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.flex-col &gt; div#sm-show-more-3</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;div id=&quot;sm-show-more-4&quot; class=&quot;cursor-pointer text-sm font-normal text-primary-600 hover:underline&quot; x-on:click=&quot;showMoreOrLess(4, 'sm-show-more-4', true)&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; div.flex-col &gt; div#sm-show-more-4</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a target=&quot;_blank&quot; href=&quot;https://www.linkedin.com/in/entmagazineamy/&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span class=&quot;md:hidden&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; button.btn-tracker-1 &gt; span.md:hidden</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;p&gt;</code>
+                      <div class="selector">Selector: <code>div.lg:flex-row-reverse &gt; div.flex &gt; div.flex &gt; p</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span class=&quot;md:hidden&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; button.btn-tracker-2 &gt; span.md:hidden</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Heading elements are not in a sequentially-descending order</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. Learn more about heading order.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;h3 id=&quot;&quot; class=&quot;standarized-title-sizes font-sans !text-lg !font-bold !leading-none !text-…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.section &gt; div.flex &gt; a.flex &gt; h3.standarized-title-sizes</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Image elements have `[alt]` attributes that are redundant text.</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Informative elements should aim for short, descriptive alternative text. Alternative text that is exactly the same as the text adjacent to the link or image is potentially confusing for screen reader users, because the text will be read twice. Learn more about the `alt` attribute.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;img class=&quot;h-[25px] w-[25px] min-w-[25px] rounded-lg&quot; src=&quot;&quot; alt=&quot;Youtube&quot; width=&quot;26&quot; height=&quot;26&quot; loading=&quot;lazy&quot; decoding=&quot;async&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; a.flex &gt; picture &gt; img.h-[25px]</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="page-row" data-page="-help-center">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ffa400" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="12.566370614359183"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ffa400">95</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/help-center" target="_blank" class="page-link">/help-center</a>
+          <div class="audit-tags"><span class="audit-tag" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast <span class="tag-count">2</span></span><span class="audit-tag" title="Heading elements are not in a sequentially-descending order">heading-order <span class="tag-count">1</span></span></div>
+        </td>
+        <td class="cell-issues">2</td>
+        <td class="cell-elements">3</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Background and foreground colors do not have a sufficient contrast ratio.</strong>
+                  <span class="element-count">2 elements</span>
+                </div>
+                <p class="audit-desc">Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span x-text=&quot;breadcrumb&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; a.hover:underline &gt; span</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;p&gt;</code>
+                      <div class="selector">Selector: <code>div &gt; div.flex &gt; div.bounded-small &gt; p</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Heading elements are not in a sequentially-descending order</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. Learn more about heading order.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;h3 id=&quot;mlleetzx&quot; class=&quot;standarized-title-sizes font-sans bounded-subtitle-lg !z-0 !mb-2 !text-cen…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.section &gt; div.relative &gt; div.mx-auto &gt; h3#mlleetzx</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="page-row" data-page="-llc-formation-by-state-north-carolina-business-names">
+        <td class="cell-score"><svg width="64" height="64" viewBox="0 0 100 100" class="score-ring">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e8e8e8" stroke-width="8"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#ffa400" stroke-width="8"
+        stroke-dasharray="251.32741228718345" stroke-dashoffset="20.106192982974665"
+        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="56" text-anchor="middle" font-size="26" font-weight="700" fill="#ffa400">92</text>
+    </svg></td>
+        <td class="cell-path">
+          <a href="https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/llc-formation-by-state/north-carolina/business-names" target="_blank" class="page-link">/llc-formation-by-state/north-carolina/business-names</a>
+          <div class="audit-tags"><span class="audit-tag" title="Background and foreground colors do not have a sufficient contrast ratio.">color-contrast <span class="tag-count">12</span></span><span class="audit-tag" title="Links do not have a discernible name">link-name <span class="tag-count">1</span></span></div>
+        </td>
+        <td class="cell-issues">2</td>
+        <td class="cell-elements">13</td>
+        <td class="cell-expand">
+          <button class="btn-expand" onclick="toggleDetails(this)" aria-label="Toggle details">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="detail-row" style="display:none">
+        <td colspan="5">
+          <div class="detail-content">
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Background and foreground colors do not have a sufficient contrast ratio.</strong>
+                  <span class="element-count">12 elements</span>
+                </div>
+                <p class="audit-desc">Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;span x-text=&quot;breadcrumb&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.flex &gt; a.hover:underline &gt; span</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; href=&quot;https://www.sosnc.gov/online_services/search/by_title/_Business_Registrati…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;/llc-formation-by-state/north-carolina&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; href=&quot;https://edpnc.com/wp-content/uploads/2024/03/A-Assumed-Business-Name-Certi…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/business-format…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/articles/legal/…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.default_styles &gt; p &gt; span &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/business-format…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; href=&quot;https://www.sosnc.gov/online_services/search/by_title/_Business_Registrati…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;#general-rules-for-llc-names&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;#north-carolina-dba-or-assumed-name&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.mb-8 &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;#register-your-business-name-with-the-north-carolina-secretary-of-state&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div &gt; div.new-model-text-class &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a class=&quot;bg-primary-200 text-primary-800text-black hover:bg-primary-200 hover:text-…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.flex &gt; div.sticky &gt; div.fixed &gt; a.bg-primary-200</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+              <div class="audit-detail">
+                <div class="audit-header">
+                  <span class="audit-icon">⚠️</span>
+                  <strong>Links do not have a discernible name</strong>
+                  <span class="element-count">1 elements</span>
+                </div>
+                <p class="audit-desc">Link text (and alternate text for images, when used as links) that is discernible, unique, and focusable improves the navigation experience for screen reader users. Learn how to make links accessible.</p>
+                <div class="items-list">
+                  
+                    <div class="item-entry">
+                      <code class="snippet">&lt;a href=&quot;https://bizeecom-feat-ga-111-fix-acce-qadqfr.laravel.cloud/business-format…&quot;&gt;</code>
+                      <div class="selector">Selector: <code>div.p-6 &gt; div.default_styles &gt; p &gt; a</code></div>
+                      <div class="explanation"></div>
+                    </div>
+                  
+                </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+        </tbody>
+      </table>
+  </div>
+
+</div>
+
+<script>
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+function toggleDetails(btn) {
+  const row = btn.closest('tr');
+  const detail = row.nextElementSibling;
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'table-row';
+  btn.classList.toggle('open', !isOpen);
+}
+</script>
+</body>
+</html>
